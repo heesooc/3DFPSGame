@@ -44,14 +44,16 @@ public class PlayerMove : MonoBehaviour
 
         // 실습 과제 4. 버튼에 따라 카메라 FPS/TPS 변경 (처음에는 FPS) (9번: FPS, 0번: TPS)
         // 카메라들을 관리하는 (TPS/FPS) 카메라 매니저 클래스 구현 및 싱글톤 적용
-
+        //  플레이어무브 클래스는 버튼 입력에 따라 카메라 매니저를 통해 FPS / TPS 변경
         if (Input.GetKeyDown(KeyCode.Alpha0))
         {
-
+            CameraManager.Instance.FPSCamera = false;
+            CameraManager.Instance.TPSCamera = true;
         }
         else if (Input.GetKeyDown(KeyCode.Alpha9))
         {
-
+            CameraManager.Instance.TPSCamera = false;
+            CameraManager.Instance.FPSCamera = true;
         }
 
 
