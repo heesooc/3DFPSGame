@@ -3,8 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 // 3인칭 슈팅 (Third Person Shooter)
-// 게임상의 캐릭터가 보는 시점이 아닌, 캐릭터를 보는 시점 즉, 3인칭 관찰자 시점의 카메라 
-
+// 게임상의 캐릭터가 보는 시점이 아닌, 캐릭터를 보는 시점 즉, 3인칭 관찰자 시점의 카메라
 public class TPSCamera : MonoBehaviour
 {
     // ** 카메라 회전 **
@@ -20,31 +19,36 @@ public class TPSCamera : MonoBehaviour
     private float _mx = 0;
     private float _my = 0;
 
-
-    void Update()
+    private void LateUpdate()
     {
-        if(CameraManager.Instance.TPSCamera == true)
+        if (CameraManager.Instance.Mode == CameraMode.TPS)
         {
             // 구현 순서:
-            // 1. 카메라를 타겟(플레이어에서 조금 떨어진 거리)으로 이동시킨다. (따라다니게 한다.)
-            transform.position = Target.position + Offset; // 오프셋(여백) 더해주기
-
+            // 1. 카메라를 타겟(플레이어에서 조금 떨어진 거리)으로 이동시킨다.(따라다니게 한다.)
+            transform.position = Target.position + Offset;
 
             // 2. 플레이어를 쳐다보게 한다.
-            // LookAt: Rotates the transform so the forward vector points at target's current position.
+            // LookAt: Rotates the transform so the forward vector points at target's current position
             transform.LookAt(Target);
+        }
 
-            // 3. 마우스 입력을 받는다.
-            float mouseX = Input.GetAxis("Mouse X");
-            float mouseY = Input.GetAxis("Mouse Y");
+        // 3. 마우스 입력을 받는다.
+        float mouseX = Input.GetAxis("Mouse X");
+        float mouseY = Input.GetAxis("Mouse Y");
 
-            // 4. 마우스 입력에 따라 회전 방향을 구한다.
-            _mx += mouseX * RotationSpeed * Time.deltaTime;
-            _my += mouseY * RotationSpeed * Time.deltaTime;
+        // 4. 마우스 입력에 따라 회전 방향을 누적한다.
+        _mx += mouseX * RotationSpeed * Time.deltaTime;
+        _my += mouseY * RotationSpeed * Time.deltaTime;
+        //_my = Mathf.Clamp(_my, -20f, 10f);
 
-            // 5. 타겟 중심으로 회전 방향에 맞게 회전한다. 
+        if (CameraManager.Instance.Mode == CameraMode.TPS)
+        {
+            // 5. 타겟 중심으로 회전 방향에 맞게 회전한다.
             transform.RotateAround(Target.position, Vector3.up, _mx);
             transform.RotateAround(Target.position, transform.right, -_my);
         }
+
+
+        //transform.position = Target.position - transform.forward * Offset.magnitude + Vector3.up * Offset.y;
     }
 }
