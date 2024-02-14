@@ -39,13 +39,28 @@ public class PlayerMove : MonoBehaviour
         dir.Normalize();
         // Transforms direction from local space to world space.
         dir = Camera.main.transform.TransformDirection(dir); // 글로벌 좌표계 (세상의 동서남북)
+        float speed = MoveSpeed; // 5
+
+
+        // 실습 과제 4. 버튼에 따라 카메라 FPS/TPS 변경 (처음에는 FPS) (9번: FPS, 0번: TPS)
+        // 카메라들을 관리하는 (TPS/FPS) 카메라 매니저 클래스 구현 및 싱글톤 적용
+
+        if (Input.GetKeyDown(KeyCode.Alpha0))
+        {
+
+        }
+        else if (Input.GetKeyDown(KeyCode.Alpha9))
+        {
+
+        }
+
 
         // 실습 과제 1. Shift 누르고 있으면 빨리 뛰기
-        float speed = MoveSpeed; // 5
         if (Input.GetKey(KeyCode.LeftShift)) // 실습 과제 2. 스태미너 구현
         {
-            // - Shfit 누른 동안에는 스태미나가 서서히 소모된다. (3초)
             Stamina -= StaminaConsumeSpeed * Time.deltaTime; // 초당 33씩 소모
+
+            // - Shfit 누른 동안에는 스태미나가 서서히 소모된다. (3초)
             if (Stamina > 0)
             {
                 speed = RunSpeed;
