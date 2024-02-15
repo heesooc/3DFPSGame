@@ -22,5 +22,7 @@ public class PlayerRotate : MonoBehaviour
 
         // 3. 누적한 값에 따라 회전한다.
         transform.eulerAngles = new Vector3(0f, _mx, 0);
+
+        
     }
 }
