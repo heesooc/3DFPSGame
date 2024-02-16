@@ -15,11 +15,14 @@ public class PlayerGunFire : MonoBehaviour
     public float FireCooltime = 0.2f;
     private float _timer;
 
-    // 실습 과제 14. 총알 최대 개수 30개 적용 및 R키 누르면 초기화(재장전)
+    
     public int GunRemainCount;
     public int GunMaxCount = 30;
     // UI 위에 text로 표시하기 (ex. 30/30)
     public Text GunTextUI;
+    public Text ReloadTextUI;
+
+    private bool isReloading = false;
 
     private void Start()
     {
@@ -33,15 +36,33 @@ public class PlayerGunFire : MonoBehaviour
         GunTextUI.text = $"{GunRemainCount}/{GunMaxCount}";
     }
 
+    private IEnumerator Reload_Coroutine()
+    {
+        isReloading = true;
+        ReloadTextUI.text = $"재장전 중...!";
+        yield return new WaitForSeconds(1.5f);
+        GunRemainCount = GunMaxCount;
+        RefreshUI();
+
+        ReloadTextUI.text = "";
+        isReloading = false;
+    }
+
     private void Update()
     {
+       
         _timer += Time.deltaTime;
 
-        if (Input.GetKeyDown(KeyCode.R))
+        if (isReloading)
         {
-            GunRemainCount = GunMaxCount;
-            RefreshUI();
+            return;
         }
+        // 실습 과제 16. R키 누르면 1.5초 후 재장전(중간에 총 쏘는 행위를 하면 재장전 취소)
+        if (Input.GetKeyDown(KeyCode.R) && !Input.GetMouseButton(0))
+        {
+            StartCoroutine(Reload_Coroutine());
+        }
+        
 
         // 1. 만약에 마우스 왼쪽 버튼을 누른 상태 && 쿨타임이 다 지난 상태
         if (Input.GetMouseButton(0) && _timer >= FireCooltime && GunRemainCount > 0)
