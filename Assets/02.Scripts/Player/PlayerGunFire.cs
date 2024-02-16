@@ -36,40 +36,34 @@ public class PlayerGunFire : MonoBehaviour
         GunTextUI.text = $"{GunRemainCount}/{GunMaxCount}";
     }
 
-    private IEnumerator Reload_Coroutine()
-    {
-        isReloading = true;
-        ReloadTextUI.text = $"재장전 중...!";
-        yield return new WaitForSeconds(1.5f);
-        GunRemainCount = GunMaxCount;
-        RefreshUI();
-
-        ReloadTextUI.text = "";
-        isReloading = false;
-    }
+    
 
     private void Update()
     {
        
         _timer += Time.deltaTime;
 
-        if (isReloading)
-        {
-            return;
-        }
+       
         // 실습 과제 16. R키 누르면 1.5초 후 재장전(중간에 총 쏘는 행위를 하면 재장전 취소)
-        if (Input.GetKeyDown(KeyCode.R) && !Input.GetMouseButton(0))
+        if (Input.GetKeyDown(KeyCode.R) )
         {
             StartCoroutine(Reload_Coroutine());
+          
         }
         
 
         // 1. 만약에 마우스 왼쪽 버튼을 누른 상태 && 쿨타임이 다 지난 상태
         if (Input.GetMouseButton(0) && _timer >= FireCooltime && GunRemainCount > 0)
         {
-            _timer = 0;
 
-            GunRemainCount--;
+            _timer = 0;
+            if (isReloading)
+            {
+                isReloading = false;
+
+            }
+
+                GunRemainCount--;
             RefreshUI();
 
             // 2. 레이(광선)을 생성하고, 위치와 방향을 설정한다.
@@ -90,5 +84,26 @@ public class PlayerGunFire : MonoBehaviour
             
         }
 
+       
+
+
+    }
+    private IEnumerator Reload_Coroutine()
+    {
+        isReloading = true;
+        ReloadTextUI.text = $"재장전 중...!";
+        yield return new WaitForSeconds(1.5f);
+        if(!isReloading )
+        {
+            ReloadTextUI.text = "";
+
+            yield break;
+        }
+        GunRemainCount = GunMaxCount;
+        RefreshUI();
+
+        ReloadTextUI.text = "";
+        isReloading = false;
+        yield break;
     }
 }
