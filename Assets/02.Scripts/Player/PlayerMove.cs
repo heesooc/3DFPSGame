@@ -16,6 +16,7 @@ public class PlayerMove : MonoBehaviour
     public float StaminaConsumeSpeed = 33f; // 초당 스태미나 소모량
     public float StaminaChargeSpeed = 50;  // 초당 스태미나 충전량
 
+
     [Header("스태미나 슬라이더 UI")]
     public Slider StaminaSliderUI;
 
@@ -31,6 +32,21 @@ public class PlayerMove : MonoBehaviour
     // 구현 순서:
     // 1. 만약에 [Spacebar] 버튼을 누르면..
     // 2. 플레이어에게 y축에 있어 점프 파워를 적용한다
+
+
+    // 목표: 벽에 닿아 있는 상태에서 스페이스바를 누르면 벽타기를 하고 싶다. 
+    // 필요 속성:
+    // - 벽타기 파워
+    public float ClimbingPower = 7f;
+    // - 벽타기 상태
+    private bool _isClimbing = false;
+    public float ClimbingStaminaConsumeFactor = 1.5f;
+        // 구현 순서
+        // 1. 만약 벽에 닿아 있는데
+        // 2. [Spacebar] 버튼을 누르고 있으면
+        // 3. 벽을 타겠다.
+
+
 
 
 
@@ -64,6 +80,23 @@ public class PlayerMove : MonoBehaviour
 
     void Update()
     {
+
+
+        // 1. 만약 벽에 닿아 있는데 && 스태미나 > 0 
+        if (Stamina > 0 && _characterController.collisionFlags == CollisionFlags.Sides) 
+        {
+            // 2. [Spacebar] 버튼을 누르고 있으면 
+            if (Input.GetKey(KeyCode.Space))
+            {
+                    // 3. 벽을 타겠다.
+                    _isClimbing = true;
+                    _yVelocity = ClimbingPower;
+                
+            }
+        }
+
+
+
         if (Input.GetKeyDown(KeyCode.Alpha9))
         {
             // FPS 카메라 모드로 전환
@@ -88,11 +121,22 @@ public class PlayerMove : MonoBehaviour
 
         // 실습 과제 1. Shift 누르고 있으면 빨리 뛰기
         float speed = MoveSpeed; // 5
-        if (Input.GetKey(KeyCode.LeftShift)) // 실습 과제 2. 스태미너 구현
+        if (_isClimbing || Input.GetKey(KeyCode.LeftShift)) // 실습 과제 2. 스태미너 구현
         {
             // - Shfit 누른 동안에는 스태미나가 서서히 소모된다. (3초)
-            Stamina -= StaminaConsumeSpeed * Time.deltaTime; // 초당 33씩 소모
-            if (Stamina > 0)
+
+           // _isClimbing ? Stamina -= StaminaConsumeSpeed * ClimbingStaminaConsumeFactor * Time.deltaTime : Stamina -= StaminaConsumeSpeed * Time.deltaTime;
+            /*if (_isClimbing )
+            {
+                Stamina -= StaminaConsumeSpeed * ClimbingStaminaConsumeFactor * Time.deltaTime; // 1.5배 더!
+
+            }
+            else
+            {
+                Stamina -= StaminaConsumeSpeed * Time.deltaTime; // 초당 33씩 소모
+            }*/
+
+            if (!_isClimbing && Stamina > 0)
             {
                 speed = RunSpeed;
             }
@@ -106,10 +150,11 @@ public class PlayerMove : MonoBehaviour
         Stamina = Mathf.Clamp(Stamina, 0, 100);
         StaminaSliderUI.value = Stamina / MaxStamina;  // 0 ~ 1;//
 
-        // 땅이면 or 구조물 위에서 떨어질 때
+        // 땅에 닿았을 때
         if (_characterController.isGrounded  )
         {
             _isJumping = false;
+            _isClimbing = false;
             _yVelocity = 0f;
             JumpRemainCount = JumpMaxCount;
         }

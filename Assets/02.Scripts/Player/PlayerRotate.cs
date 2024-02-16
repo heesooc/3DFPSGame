@@ -13,6 +13,11 @@ public class PlayerRotate : MonoBehaviour
 
     void Update()
     {
+        if (!CameraManager.Focus)
+        {
+            return;
+        }
+
         // 1. 마우스 입력(drag) 받는다.
         float mouseX = Input.GetAxis("Mouse X");
 
@@ -22,7 +27,10 @@ public class PlayerRotate : MonoBehaviour
 
         // 3. 누적한 값에 따라 회전한다.
         transform.eulerAngles = new Vector3(0f, _mx, 0);
+    }
 
-        
+    public void ResetX()
+    {
+        _mx = 0;
     }
 }
