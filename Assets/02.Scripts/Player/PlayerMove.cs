@@ -125,7 +125,12 @@ public class PlayerMove : MonoBehaviour
         {
             // - Shfit 누른 동안에는 스태미나가 서서히 소모된다. (3초)
 
-           // _isClimbing ? Stamina -= StaminaConsumeSpeed * ClimbingStaminaConsumeFactor * Time.deltaTime : Stamina -= StaminaConsumeSpeed * Time.deltaTime;
+            float factor = _isClimbing ? ClimbingStaminaConsumeFactor : 1f;
+            Stamina -= StaminaConsumeSpeed * factor * Time.deltaTime;
+
+            //Stamina -= _isClimbing ? StaminaConsumeSpeed * ClimbingStaminaConsumeFactor * Time.deltaTime : StaminaConsumeSpeed * Time.deltaTime;
+            // _isClimbing ? Stamina -= StaminaConsumeSpeed * ClimbingStaminaConsumeFactor * Time.deltaTime : Stamina -= StaminaConsumeSpeed * Time.deltaTime;
+            
             /*if (_isClimbing )
             {
                 Stamina -= StaminaConsumeSpeed * ClimbingStaminaConsumeFactor * Time.deltaTime; // 1.5배 더!
