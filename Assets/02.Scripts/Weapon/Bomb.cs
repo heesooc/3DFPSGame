@@ -10,7 +10,7 @@ public class Bomb : MonoBehaviour
     // 필요 속성:
     // - 범위
     public float ExplosionRadius = 3;
-    // 구현 순서:
+    // 구현 순서: 
     // 1. 터질 때
     // 2. 범위 안에 있는 모든 콜라이더를 찾는다.
     // 3. 찾은 콜라이더 중에서 타격 가능한(IHitable) 오브젝트를 찾는다.
