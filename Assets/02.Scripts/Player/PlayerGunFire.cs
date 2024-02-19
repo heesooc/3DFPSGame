@@ -21,8 +21,9 @@ public class PlayerGunFire : MonoBehaviour
     // UI 위에 text로 표시하기 (ex. 30/30)
     public Text GunTextUI;
     public Text ReloadTextUI;
+    private const float RELOAD_TIME = 1.5f;
 
-    private bool isReloading = false;
+    private bool _isReloading = false;
 
     private void Start()
     {
@@ -40,31 +41,39 @@ public class PlayerGunFire : MonoBehaviour
 
     private void Update()
     {
-       
-        _timer += Time.deltaTime;
-
-       
         // 실습 과제 16. R키 누르면 1.5초 후 재장전(중간에 총 쏘는 행위를 하면 재장전 취소)
         if (Input.GetKeyDown(KeyCode.R) )
         {
-            StartCoroutine(Reload_Coroutine());
+            if (!_isReloading)
+            {
+
+                StartCoroutine(Reload_Coroutine());
+            }
           
         }
-        
+        _timer += Time.deltaTime;
 
         // 1. 만약에 마우스 왼쪽 버튼을 누른 상태 && 쿨타임이 다 지난 상태
         if (Input.GetMouseButton(0) && _timer >= FireCooltime && GunRemainCount > 0)
         {
+            // 재장전 취소
+            if (_isReloading)
+            {
+                StopAllCoroutines();
+                _isReloading = false;
+            }
+            GunRemainCount--;
+            RefreshUI();
 
             _timer = 0;
-            if (isReloading)
+
+            /*if (_isReloading)
             {
-                isReloading = false;
+                _isReloading = false;
 
-            }
+            }*/
 
-                GunRemainCount--;
-            RefreshUI();
+            
 
             // 2. 레이(광선)을 생성하고, 위치와 방향을 설정한다.
             Ray ray = new Ray(Camera.main.transform.position, Camera.main.transform.forward);
@@ -84,26 +93,23 @@ public class PlayerGunFire : MonoBehaviour
             
         }
 
-       
-
-
     }
     private IEnumerator Reload_Coroutine()
     {
-        isReloading = true;
+        _isReloading = true;
         ReloadTextUI.text = $"재장전 중...!";
-        yield return new WaitForSeconds(1.5f);
-        if(!isReloading )
+        yield return new WaitForSeconds(RELOAD_TIME);
+        /*if(!_isReloading )
         {
             ReloadTextUI.text = "";
 
             yield break;
-        }
+        }*/
         GunRemainCount = GunMaxCount;
         RefreshUI();
 
-        ReloadTextUI.text = "";
-        isReloading = false;
-        yield break;
+        // ReloadTextUI.text = "";
+        _isReloading = false;
+       // yield break;
     }
 }
