@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class PlayerMove : MonoBehaviour
+public class PlayerMove : MonoBehaviour, IHitable
 {
     // 목표: 키보드 방향키(wasd)를 누르면 캐릭터를 바라보는 방향 기준으로 이동시키고 싶다. 
     // 속성:
@@ -41,13 +41,15 @@ public class PlayerMove : MonoBehaviour
     // - 벽타기 상태
     private bool _isClimbing = false;
     public float ClimbingStaminaConsumeFactor = 1.5f;
-        // 구현 순서
-        // 1. 만약 벽에 닿아 있는데
-        // 2. [Spacebar] 버튼을 누르고 있으면
-        // 3. 벽을 타겠다.
+    // 구현 순서
+    // 1. 만약 벽에 닿아 있는데
+    // 2. [Spacebar] 버튼을 누르고 있으면
+    // 3. 벽을 타겠다.
 
 
-
+    public int Health;
+    public int MaxHealth = 100;
+    public Slider HealthSliderUI;
 
 
     // 목표: 캐릭터에 중력을 적용하고 싶다.
@@ -61,7 +63,14 @@ public class PlayerMove : MonoBehaviour
     // 2. 플레이어에게 y축에 있어 중력을 적용한다.
 
 
-
+    public void Hit(int damage)
+    {
+        Health -= damage;
+        if (Health <= 0)
+        {
+            Destroy(gameObject);
+        }
+    }
 
     private void Awake()
     {
@@ -71,6 +80,12 @@ public class PlayerMove : MonoBehaviour
     private void Start()
     {
         Stamina = MaxStamina;
+        Init();
+    }
+
+    public void Init()
+    {
+        Health = MaxHealth;
     }
 
     // 구현 순서
@@ -80,7 +95,7 @@ public class PlayerMove : MonoBehaviour
 
     void Update()
     {
-
+        HealthSliderUI.value = (float)Health / (float)MaxHealth; // 0 ~ 1
 
         // 1. 만약 벽에 닿아 있는데 && 스태미나 > 0 
         if (Stamina > 0 && _characterController.collisionFlags == CollisionFlags.Sides) 
@@ -195,4 +210,5 @@ public class PlayerMove : MonoBehaviour
         //transform.position += speed * dir * Time.deltaTime;
         _characterController.Move(dir * speed * Time.deltaTime);
     }
+
 }

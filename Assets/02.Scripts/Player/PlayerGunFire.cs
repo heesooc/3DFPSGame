@@ -3,9 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-
 public class PlayerGunFire : MonoBehaviour
 {
+    public int Damage = 1;
+
     // 목표: 마우스 왼쪽 버튼을 누르면 시선이 바라보는 방향으로 총을 발사하고 싶다.
     // 필요 속성
     // - 총알 튀는 이펙트 프리팹
@@ -42,7 +43,7 @@ public class PlayerGunFire : MonoBehaviour
     private void Update()
     {
         // 실습 과제 16. R키 누르면 1.5초 후 재장전(중간에 총 쏘는 행위를 하면 재장전 취소)
-        if (Input.GetKeyDown(KeyCode.R) )
+        if (Input.GetKeyDown(KeyCode.R))
         {
             if (!_isReloading)
             {
@@ -59,19 +60,15 @@ public class PlayerGunFire : MonoBehaviour
             // 재장전 취소
             if (_isReloading)
             {
+                ReloadTextUI.text = "";
                 StopAllCoroutines();
+                
                 _isReloading = false;
             }
             GunRemainCount--;
             RefreshUI();
 
             _timer = 0;
-
-            /*if (_isReloading)
-            {
-                _isReloading = false;
-
-            }*/
 
             
 
@@ -83,6 +80,13 @@ public class PlayerGunFire : MonoBehaviour
             bool isHit = Physics.Raycast(ray, out hitInfo);
             if (isHit)
             {
+                // 실습 과제 18. 레이저를 몬스터에게 맞출 시 몬스터 체력 닳는 기능 구현
+                IHitable hitableObject = hitInfo.collider.GetComponent<IHitable>();
+                if (hitableObject != null) // 때릴 수 있는 친구인가요?
+                {
+                    hitableObject.Hit(Damage);
+                }
+                
                 // 5. 부딪힌 위치에 (총알이 튀는)이펙트를 위치한다.
                 HitEffect.gameObject.transform.position = hitInfo.point;
                 // 6. 이펙트가 쳐다보는 방향을 부딛힌 위치의 법선 벡터로 한다.
@@ -99,17 +103,12 @@ public class PlayerGunFire : MonoBehaviour
         _isReloading = true;
         ReloadTextUI.text = $"재장전 중...!";
         yield return new WaitForSeconds(RELOAD_TIME);
-        /*if(!_isReloading )
-        {
-            ReloadTextUI.text = "";
-
-            yield break;
-        }*/
+        
         GunRemainCount = GunMaxCount;
         RefreshUI();
 
-        // ReloadTextUI.text = "";
+         ReloadTextUI.text = "";
         _isReloading = false;
-       // yield break;
+        yield break;
     }
 }
