@@ -42,7 +42,7 @@ public class Drum : MonoBehaviour, IHitable
                 foreach (Collider collider in colliders)
                 {
                     IHitable hitable = collider.GetComponent<IHitable>();
-                    if (collider.TryGetComponent<IHitable>(out hitable))
+                    if (collider.TryGetComponent<IHitable>(out hitable)) //GameObject.GetComponent 와 비교할 때 눈에 띄는 차이점 = 요청된 구성 요소가 존재하지 않을 때 이 메서드가 에디터에서 할당되지 않는다는 것
                     // if (hitable != null)
                     {
                         hitable.Hit(Damage);
