@@ -20,7 +20,9 @@ public class Gun : MonoBehaviour // 인벤토리: 수납된 물품 목록 (껐�
     public int PoolSize = 20;
     // - 오브젝트(총) 풀 
     private List<GameObject> _GunPool = null;*/
-
+    
+    // - 대표 이미지
+    public Sprite ProfileImage;
 
     // - 공격력
     public int Damage = 10;

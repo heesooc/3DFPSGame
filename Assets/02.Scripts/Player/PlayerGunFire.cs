@@ -6,6 +6,9 @@ using UnityEngine.UI;
 public class PlayerGunFire : MonoBehaviour
 {
     public Gun CurrentGun; // 현재 들고있는 총
+    private int _currentGunIndex; // 현재 들고 있는 총의 순서
+
+
     private float _timer;
     
     // 총을 담는 인벤토리
@@ -22,17 +25,22 @@ public class PlayerGunFire : MonoBehaviour
     public Text GunTextUI;
     public Text ReloadTextUI;
     
-
     private bool _isReloading = false;
+
+    // 무기 이미지 UI
+    public Image GunImageUI;
 
     private void Start()
     {
+        _currentGunIndex = 0;
+
         RefreshUI();
         RefreshGun();
     }
 
     private void RefreshUI()
     {
+        GunImageUI.sprite = CurrentGun.ProfileImage;
         GunTextUI.text = $"{CurrentGun.BulletRemainCount}/{CurrentGun.BulletMaxCount}";
     }
 
@@ -40,27 +48,53 @@ public class PlayerGunFire : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Alpha1))
+        if (Input.GetKeyDown(KeyCode.LeftBracket)) // '['
         {
+            _currentGunIndex--;
+            if (_currentGunIndex < 0)
+            {
+                _currentGunIndex = GunInventory.Count - 1;
+            }
+            CurrentGun = GunInventory[_currentGunIndex];
+            RefreshGun();
+            RefreshUI();
+        } 
+        else if (Input.GetKeyDown(KeyCode.RightBracket)) // ']'
+        {
+            _currentGunIndex++;
+            if (_currentGunIndex >= GunInventory.Count)
+            {
+                _currentGunIndex = 0;
+            }
+            CurrentGun = GunInventory[_currentGunIndex];
+            RefreshGun();
+            RefreshUI();
+        }
+
+        else if (Input.GetKeyDown(KeyCode.Alpha1))
+        {
+            _currentGunIndex = 0;
             CurrentGun = GunInventory[0];
             RefreshGun();
             RefreshUI();
         }
         else if (Input.GetKeyDown(KeyCode.Alpha2))
         {
+            _currentGunIndex = 1;
             CurrentGun = GunInventory[1];
             RefreshGun();
             RefreshUI();
         }
         else if (Input.GetKeyDown(KeyCode.Alpha3))
         {
+            _currentGunIndex = 2;  
             CurrentGun = GunInventory[2];
             RefreshGun();
             RefreshUI();
         }
 
         // 실습 과제 16. R키 누르면 1.5초 후 재장전(중간에 총 쏘는 행위를 하면 재장전 취소)
-        if (Input.GetKeyDown(KeyCode.R))
+        if (Input.GetKeyDown(KeyCode.R) && CurrentGun.BulletRemainCount < CurrentGun.BulletMaxCount)
         {
             if (!_isReloading)
             {
