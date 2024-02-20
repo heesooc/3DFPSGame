@@ -10,7 +10,14 @@ public class PlayerGunFire : MonoBehaviour
 
 
     private float _timer;
-    
+
+    private const int DefaultFOV = 60;
+    private const int ZoomFOV = 20;
+    private bool _isZoomMode = false; // 줌 모드냐?
+
+    public GameObject CrosshairUI;
+    public GameObject CrosshairZoomUI;
+
     // 총을 담는 인벤토리
     public List<Gun> GunInventory;
 
@@ -29,6 +36,7 @@ public class PlayerGunFire : MonoBehaviour
 
     // 무기 이미지 UI
     public Image GunImageUI;
+    
 
     private void Start()
     {
@@ -42,12 +50,36 @@ public class PlayerGunFire : MonoBehaviour
     {
         GunImageUI.sprite = CurrentGun.ProfileImage;
         GunTextUI.text = $"{CurrentGun.BulletRemainCount}/{CurrentGun.BulletMaxCount}";
+
+        CrosshairUI.SetActive(!_isZoomMode);
+        CrosshairZoomUI.SetActive(_isZoomMode);
     }
 
-    
+    // 줌 모드에 따라 카메라 FOV(Field Of View:시야) 수정해주는 메서드
+    private void RefreshZoomMode()
+    {
+        if (!_isZoomMode)
+        {
+            Camera.main.fieldOfView = DefaultFOV;
+
+        }
+        else
+        {
+            Camera.main.fieldOfView = ZoomFOV;
+        }
+    }
 
     private void Update()
     {
+        // 마우스 휠 버튼 눌렀을 때 && 현재 총이 스나이퍼
+        if (Input.GetMouseButtonDown(2) && CurrentGun.GType == GunType.Sniper)
+        {
+            _isZoomMode = !_isZoomMode; // 줌 모드 뒤집기
+            RefreshZoomMode();
+            RefreshUI();
+        }
+
+
         if (Input.GetKeyDown(KeyCode.LeftBracket)) // '['
         {
             _currentGunIndex--;
@@ -75,6 +107,8 @@ public class PlayerGunFire : MonoBehaviour
         {
             _currentGunIndex = 0;
             CurrentGun = GunInventory[0];
+            _isZoomMode = false;
+            RefreshZoomMode();
             RefreshGun();
             RefreshUI();
         }
@@ -89,6 +123,8 @@ public class PlayerGunFire : MonoBehaviour
         {
             _currentGunIndex = 2;  
             CurrentGun = GunInventory[2];
+            _isZoomMode = false;
+            RefreshZoomMode();
             RefreshGun();
             RefreshUI();
         }
