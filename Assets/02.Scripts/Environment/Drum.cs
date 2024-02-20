@@ -1,73 +1,89 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class Drum : MonoBehaviour, IHitable
 {
-    public GameObject DrumEffectPrefab;
-    public float UpPower = 20f;
-    public float DestroyTime = 3f;
-    public float _timer;
-
-    public float ExplosionRadius = 3;
-
+    // 실습 과제 19. 총으로 드럼통 3번 맞출 시 사라지게 구현
     private int _hitCount = 0;
+    public GameObject ExplosionPaticlePrefab;
+    private Rigidbody _rigidbody;
+    public float UpPower = 50f;
 
     public int Damage = 70;
+    public float ExplosionRadius = 10f;
+
+    private bool _isExplosion = false;
+
+    private void Start()
+    {
+        _rigidbody = GetComponent<Rigidbody>();
+    }
+
 
     public void Hit(int damage)
     {
         _hitCount += 1;
-        if( _hitCount >= 3 )
-        {
-           
-
-            GameObject effect = Instantiate(DrumEffectPrefab);
-            effect.transform.position = this.gameObject.transform.position;
-
-            GameObject drum = this.gameObject;
-            Rigidbody rigidbody = drum.GetComponent<Rigidbody>();
-            rigidbody.velocity = Vector3.zero;
-            rigidbody.AddForce(Vector3.up * UpPower, ForceMode.Impulse);
-            rigidbody.AddTorque(new Vector3(1, 0, 1) * UpPower / 2f); // 회전력
-
-            // 1. 터질 때
-            // private void OnCollisionEnter(Collision other) //두 물체 물리적 충돌 X ->드럼이 터지는 순간에 데미지를 입히는 코드 실행
-            {
-                // 2. 범위 안에 있는 모든 콜라이더를 찾는다.
-                int findLayer = LayerMask.GetMask("Player") | LayerMask.GetMask("Monster");
-                Collider[] colliders = Physics.OverlapSphere(transform.position, ExplosionRadius, findLayer);
-
-                // 3. 찾은 콜라이더 중에서 타격 가능한(IHitable) 오브젝트를 찾아서 Hit()한다.
-                foreach (Collider collider in colliders)
-                {
-                    IHitable hitable = collider.GetComponent<IHitable>();
-                    if (collider.TryGetComponent<IHitable>(out hitable)) //GameObject.GetComponent 와 비교할 때 눈에 띄는 차이점 = 요청된 구성 요소가 존재하지 않을 때 이 메서드가 에디터에서 할당되지 않는다는 것
-                    // if (hitable != null)
-                    {
-                        hitable.Hit(Damage);
-                    }
-                }
-            }
-
-        }
-    }
-
-    private void Update()
-    {
         if (_hitCount >= 3)
         {
-            _timer += Time.deltaTime;
-            
-            if (_timer >= DestroyTime)
-            {
-                Destroy(gameObject);
-
-            }
+            Explosion();
         }
     }
 
-   
+    private void Explosion()
+    {
 
+        if (_isExplosion)
+        {
+            return;
+        }
+
+        _isExplosion = true;
+
+        GameObject explosion = Instantiate(ExplosionPaticlePrefab);
+        explosion.transform.position = this.transform.position;
+        _rigidbody.AddForce(Vector3.up * UpPower, ForceMode.Impulse);
+        _rigidbody.AddTorque(new Vector3(1, 0, 1) * UpPower / 2f);
+
+        // 실습 과제 22. 드럼통 폭발할 때 주변 Hitable한 Monster와 Player에게 데미지 70
+        // 1. 폭발 범위 내 콜라이더 찾기
+        int findLayer = LayerMask.GetMask("Player") | LayerMask.GetMask("Monster");
+        Collider[] colliders = Physics.OverlapSphere(transform.position, ExplosionRadius, findLayer);
+
+        // 2. 콜라이더 내에서 Hitable 찾기
+        foreach (Collider c in colliders)
+        {
+            IHitable hitable = null;
+            if (c.TryGetComponent<IHitable>(out hitable))
+            {
+                // 3. 데미지 주기
+                hitable.Hit(Damage);
+            }
+        }
+        int environmentLayer = LayerMask.GetMask("Environment");
+        Collider[] environmentColliders = Physics.OverlapSphere(transform.position, ExplosionRadius, environmentLayer);
+
+        // 2. 콜라이더 내에서 Hitable 찾기
+        foreach (Collider c in environmentColliders)
+        {
+            Drum drum = null;
+            if (c.TryGetComponent<Drum>(out drum))
+            {
+                // 3. 주변 드럼 폭파
+                drum.Explosion();
+            }
+        }
+
+
+
+        StartCoroutine(Kill_Coroutine());
+    }
+
+    private IEnumerator Kill_Coroutine()
+    {
+        yield return new WaitForSeconds(3f);
+        Destroy(gameObject);
+    }
 }
 
