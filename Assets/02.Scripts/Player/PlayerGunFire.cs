@@ -5,43 +5,60 @@ using UnityEngine.UI;
 
 public class PlayerGunFire : MonoBehaviour
 {
-    public int Damage = 1;
+    public Gun CurrentGun; // 현재 들고있는 총
+    private float _timer;
+    
+    // 총을 담는 인벤토리
+    public List<Gun> GunInventory;
 
     // 목표: 마우스 왼쪽 버튼을 누르면 시선이 바라보는 방향으로 총을 발사하고 싶다.
     // 필요 속성
     // - 총알 튀는 이펙트 프리팹
     public ParticleSystem HitEffect;
 
-    // - 발사 쿨타임
-    public float FireCooltime = 0.2f;
-    private float _timer;
+   
 
-    
-    public int GunRemainCount;
-    public int GunMaxCount = 30;
     // UI 위에 text로 표시하기 (ex. 30/30)
     public Text GunTextUI;
     public Text ReloadTextUI;
-    private const float RELOAD_TIME = 1.5f;
+    
 
     private bool _isReloading = false;
 
     private void Start()
     {
-        GunRemainCount = GunMaxCount;
-
         RefreshUI();
+        RefreshGun();
     }
 
     private void RefreshUI()
     {
-        GunTextUI.text = $"{GunRemainCount}/{GunMaxCount}";
+        GunTextUI.text = $"{CurrentGun.BulletRemainCount}/{CurrentGun.BulletMaxCount}";
     }
 
     
 
     private void Update()
     {
+        if (Input.GetKeyDown(KeyCode.Alpha1))
+        {
+            CurrentGun = GunInventory[0];
+            RefreshGun();
+            RefreshUI();
+        }
+        else if (Input.GetKeyDown(KeyCode.Alpha2))
+        {
+            CurrentGun = GunInventory[1];
+            RefreshGun();
+            RefreshUI();
+        }
+        else if (Input.GetKeyDown(KeyCode.Alpha3))
+        {
+            CurrentGun = GunInventory[2];
+            RefreshGun();
+            RefreshUI();
+        }
+
         // 실습 과제 16. R키 누르면 1.5초 후 재장전(중간에 총 쏘는 행위를 하면 재장전 취소)
         if (Input.GetKeyDown(KeyCode.R))
         {
@@ -55,7 +72,7 @@ public class PlayerGunFire : MonoBehaviour
         _timer += Time.deltaTime;
 
         // 1. 만약에 마우스 왼쪽 버튼을 누른 상태 && 쿨타임이 다 지난 상태
-        if (Input.GetMouseButton(0) && _timer >= FireCooltime && GunRemainCount > 0)
+        if (Input.GetMouseButton(0) && _timer >= CurrentGun.FireCooltime && CurrentGun.BulletRemainCount > 0)
         {
             // 재장전 취소
             if (_isReloading)
@@ -65,7 +82,7 @@ public class PlayerGunFire : MonoBehaviour
                 
                 _isReloading = false;
             }
-            GunRemainCount--;
+            CurrentGun.BulletRemainCount--;
             RefreshUI();
 
             _timer = 0;
@@ -85,7 +102,7 @@ public class PlayerGunFire : MonoBehaviour
                 IHitable hitableObject = hitInfo.collider.GetComponent<IHitable>();
                 if (hitableObject != null)
                 {
-                    hitableObject.Hit(Damage);
+                    hitableObject.Hit(CurrentGun.Damage);
                 }
                 
                 // 5. 부딪힌 위치에 (총알이 튀는)이펙트를 위치한다.
@@ -103,13 +120,30 @@ public class PlayerGunFire : MonoBehaviour
     {
         _isReloading = true;
         ReloadTextUI.text = $"재장전 중...!";
-        yield return new WaitForSeconds(RELOAD_TIME);
-        
-        GunRemainCount = GunMaxCount;
+        yield return new WaitForSeconds(CurrentGun.ReloadTime);
+
+        CurrentGun.BulletRemainCount = CurrentGun.BulletMaxCount;
         RefreshUI();
 
          ReloadTextUI.text = "";
         _isReloading = false;
         yield break;
+    }
+
+    private void RefreshGun()
+    {
+        foreach (Gun gun in GunInventory)
+        {
+            /*if (gun == CurrentGun)
+            {
+                gun.gameObject.SetActive(true);
+            }
+            else
+            {
+                gun.gameObject.SetActive(false);
+            }
+*/
+            gun.gameObject.SetActive(gun == CurrentGun);
+        }
     }
 }
