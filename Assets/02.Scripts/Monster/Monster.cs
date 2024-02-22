@@ -1,3 +1,4 @@
+using JetBrains.Annotations;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -11,13 +12,24 @@ public class Monster : MonoBehaviour, IHitable
     public int MaxHealth = 100;
     public Slider HealthSliderUI;
 
+    
+
     public void Hit(int damage)
     {
         Health -= damage;
         if (Health <= 0)
         {
-            Destroy(gameObject);
+            Die();
+            
         }
+    }
+
+    private void Die()
+    {
+        // 죽을 때 아이템 생성
+        ItemObjectFactory.Instance.MakePercent(transform.position);
+
+        Destroy(gameObject);
     }
 
     void Start()

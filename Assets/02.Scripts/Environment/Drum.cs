@@ -63,8 +63,6 @@ public class Drum : MonoBehaviour, IHitable
         }
         int environmentLayer = LayerMask.GetMask("Environment");
         Collider[] environmentColliders = Physics.OverlapSphere(transform.position, ExplosionRadius, environmentLayer);
-
-        // 2. 콜라이더 내에서 Hitable 찾기
         foreach (Collider c in environmentColliders)
         {
             Drum drum = null;
@@ -75,6 +73,7 @@ public class Drum : MonoBehaviour, IHitable
             }
         }
 
+        ItemObjectFactory.Instance.MakePercent(transform.position);
 
 
         StartCoroutine(Kill_Coroutine());

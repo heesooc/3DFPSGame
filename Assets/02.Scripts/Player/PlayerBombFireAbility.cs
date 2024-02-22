@@ -4,7 +4,7 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class PlayerBombFire : MonoBehaviour
+public class PlayerBombFireAbility : MonoBehaviour
 {
     public GameObject BombPrefab;
     public Transform FirePosition;

@@ -99,7 +99,7 @@ public class CameraManager : MonoBehaviour
             X = 0;
             Y = 0;
 
-            FindObjectOfType<PlayerRotate>()?.ResetX();
+            FindObjectOfType<PlayerRotateAbility>()?.ResetX();
         }
     }
 
