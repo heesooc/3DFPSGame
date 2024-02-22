@@ -28,10 +28,14 @@ public class ItemObjectFactory : MonoBehaviour
 
     public void Awake()
     {
+        // 싱글톤 인스턴스를 설정
         Instance = this;
 
+        // 아이템 풀을 초기화
         _itemPool = new List<ItemObject>();
 
+
+        // PoolCount 만큼 아이템을 생성하여 풀에 저장
         for (int i = 0; i < PoolCount; ++i)             // 10번
         {
             foreach (GameObject prefab in ItemPrefabs)  // 3개
@@ -48,6 +52,7 @@ public class ItemObjectFactory : MonoBehaviour
         }
     }
 
+    // Get 메소드는 주어진 아이템 타입에 해당하는 아이템 오브젝트를 아이템 풀에서 찾아 반환
     private ItemObject Get(ItemType itemType) // 창고 뒤지기 
     {
         foreach(ItemObject itemObject in _itemPool) // 창고를 뒤진다.
@@ -62,7 +67,7 @@ public class ItemObjectFactory : MonoBehaviour
         return null;
     }
 
-    // 확률 생성 (공장아! 랜덤박스 주문할게!)
+    // MakePercent 메소드: 확률 생성 (공장아! 랜덤박스 주문할게!)
     public void MakePercent(Vector3 position)
     {
         int percentage = UnityEngine.Random.Range(0, 100);
@@ -80,13 +85,15 @@ public class ItemObjectFactory : MonoBehaviour
         }
     }
 
-    // 기본 생성 (공장아! 내가 원하는거 주문할게!)
+    // Make 메소드: 기본 생성 (공장아! 내가 원하는거 주문할게!)
     public void Make(ItemType itemType, Vector3 position)
     {
+        // 아이템 풀에서 아이템 오브젝트를 가져옴
         ItemObject itemObject = Get(itemType);
 
         if (itemObject != null)
         {
+            // 아이템의 위치를 설정하고 아이템을 활성화
             itemObject.transform.position = position;
             itemObject.gameObject.SetActive(true);
         }

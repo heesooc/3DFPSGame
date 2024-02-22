@@ -21,7 +21,7 @@ public class ItemObject : MonoBehaviour
             ItemManager.Instance.AddItem(ItemType);
 
             // 2. 사라진다.
-            Destroy(gameObject);
+            gameObject.SetActive(false);
         }        
     }
 }
