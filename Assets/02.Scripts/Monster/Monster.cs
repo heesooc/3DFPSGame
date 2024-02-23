@@ -8,11 +8,13 @@ using UnityEngine.AI;
 public enum MonsterState // 몬스터의 상태
 {
     Idle,       // 대기
+    Patrol,     // 순찰    
     Trace,      // 추적
     Attack,     // 공격
     Comeback,   // 복귀
     Damaged,    // 공격 당함
     Die         // 사망
+
 }
 
 
@@ -46,7 +48,10 @@ public class Monster : MonoBehaviour, IHitable
     private const float KNOCKBACK_DURATION = 0.2f;
     private float _knockbackProgress = 0f;
     public float KnockbackPower = 1.2f;
-    
+
+    public Transform PatrolTarget;
+    private float _idleTimer = 0f;
+    private const float IDLE_DURATION = 3f;
 
     private MonsterState _currentState = MonsterState.Idle;
     void Start()
@@ -79,6 +84,10 @@ public class Monster : MonoBehaviour, IHitable
                 Idle();
                 break;
 
+            case MonsterState.Patrol:
+                Patrol();
+                break;
+
             case MonsterState.Trace:
                 Trace();
                 break;
@@ -108,6 +117,38 @@ public class Monster : MonoBehaviour, IHitable
             Debug.Log("상태 전환: Idle -> Trace");
             _currentState = MonsterState.Trace;
         }
+
+        // 과제 38. 순찰 상태 구현: Idle 상태에서 {N초} 이상 머물러 있으면 {특정 지점}으로 순찰을 간다.
+        _idleTimer += Time.deltaTime;
+        if (PatrolTarget != null && _idleTimer >= IDLE_DURATION)
+        {
+            // {특정 지점}으로 순찰을 감
+            Debug.Log("상태 전환: Idle -> Patrol");
+            _currentState = MonsterState.Patrol;
+            _idleTimer = 0f;
+        }
+    }
+
+    private void Patrol()
+    {
+        // NavMeshAgent의 '멈춤 거리'를 0으로 설정. 이는 목표지점까지 계속 이동하게 함.
+        _navMeshAgent.stoppingDistance = 0f;
+        // NavMeshAgent의 '목표지점'을 순찰 지점으로 설정
+        _navMeshAgent.SetDestination(PatrolTarget.position);
+
+        // 플레이어와 몬스터 사이의 거리를 계산하고, 이 거리가 발견 범위(FindDistance) 이내라면 추적 상태로 전환
+        if (Vector3.Distance(_target.position, transform.position) <= FindDistance)
+        {
+            Debug.Log("상태 전환: Patrol -> Trace");
+            _currentState = MonsterState.Trace;
+        }
+        // NavMeshAgent의 경로 계산이 끝났고, 남아있는 거리가 허용 오차(TOLERANCE) 이하라면 복귀 상태로 전환
+        if (!_navMeshAgent.pathPending && _navMeshAgent.remainingDistance <= TOLERANCE) // pathPending: 경로 보류 중
+        {
+            Debug.Log("상태 전환: Patrol -> Comeback");
+            _currentState = MonsterState.Comeback;
+        }
+
     }
 
     private void Trace()
