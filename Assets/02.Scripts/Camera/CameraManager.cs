@@ -36,6 +36,9 @@ public class CameraManager : MonoBehaviour
         }
     }
 
+    public CameraShake CameraShake;
+
+
     private FPSCamera _FPSCamera;
     private TPSCamera _TPSCamera;
 

@@ -51,6 +51,8 @@ public class PlayerMoveAbility : MonoBehaviour, IHitable
     public int MaxHealth = 100;
     public Slider HealthSliderUI;
 
+    public Image HitEffectImageUI;
+
 
     // 목표: 캐릭터에 중력을 적용하고 싶다.
     // 필요 속성:
@@ -65,11 +67,24 @@ public class PlayerMoveAbility : MonoBehaviour, IHitable
 
     public void Hit(int damage)
     {
+        StartCoroutine(HitEffect_Coroutine(0.2f));
+        CameraManager.Instance.CameraShake.Shake();
+
         Health -= damage;
         if (Health <= 0)
         {
             Destroy(gameObject);
+            //gameObject.SetActive(false);
         }
+    }
+
+    private IEnumerator HitEffect_Coroutine(float delay)
+    {
+        // 과제 40. 히트 이펙트 이미지 0.3초동안 보이게 구현
+        HitEffectImageUI.gameObject.SetActive(true); 
+        yield return new WaitForSeconds(delay); 
+        HitEffectImageUI.gameObject.SetActive(false); 
+
     }
 
     private void Awake()
@@ -171,8 +186,21 @@ public class PlayerMoveAbility : MonoBehaviour, IHitable
         StaminaSliderUI.value = Stamina / MaxStamina;  // 0 ~ 1;//
 
         // 땅에 닿았을 때
-        if (_characterController.isGrounded  )
+        if (_characterController.isGrounded )
         {
+            // 만약 캐릭터의 y축 속도(_yVelocity)가 -30 미만인 경우,
+            // 즉, 아래 방향으로 매우 빠르게 이동하고 있다면 (예: 높은 곳에서 떨어지는 경우)
+            if (_yVelocity < -10)
+            {
+                // 데미지를 입힘
+                // 데미지의 양: ((y축 속도의 절대값) / 10) 정수 부분에 * 10 값
+                /* ex) -30 < y축 속도 < -40 일 때, Damage는 10 * (30~40 / 10) = 30~40
+                   ex) -50 < y축 속도 < -40 일 때, Damage는 10 * (40~50 / 10) = 40~50*/
+                // switch case문 시험성적 100->10, 99~90->9... 로 매기듯이 하기위하여 곱하기/나누기함
+                // 이렇게 하면 높은 곳에서 떨어져서 더 빠른 속도로 추락하면 더 많은 데미지를 입게 됨
+                Hit(10 * (int)(_yVelocity / -10f));
+            }
+
             _isJumping = false;
             _isClimbing = false;
             _yVelocity = 0f;

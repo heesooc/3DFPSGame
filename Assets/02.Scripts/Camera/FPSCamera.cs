@@ -49,7 +49,8 @@ public class FPSCamera : MonoBehaviour
         if (CameraManager.Instance.Mode == CameraMode.FPS)
         {
             // 1. 캐릭터의 눈 위치로 카메라를 이동시킨다.
-            transform.position = Target.position;
+            transform.localPosition = Target.position;
+
         }
 
 
