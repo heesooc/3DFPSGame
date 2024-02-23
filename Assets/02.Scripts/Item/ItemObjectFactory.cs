@@ -95,6 +95,7 @@ public class ItemObjectFactory : MonoBehaviour
         {
             // 아이템의 위치를 설정하고 아이템을 활성화
             itemObject.transform.position = position;
+            itemObject.Init();
             itemObject.gameObject.SetActive(true);
         }
     }

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
-
+using UnityEngine.AI;
 public enum MonsterState // 몬스터의 상태
 {
     Idle,       // 대기
@@ -24,7 +24,11 @@ public class Monster : MonoBehaviour, IHitable
     public Slider HealthSliderUI;
 
     /**************************************************************/
-    private CharacterController _characterController;
+
+    // private CharacterController _characterController;
+    private NavMeshAgent _navMeshAgent;
+
+
 
     public Transform _target;           // 플레이어
     public float FindDistance = 5f;     // 감지 범위
@@ -47,7 +51,10 @@ public class Monster : MonoBehaviour, IHitable
     private MonsterState _currentState = MonsterState.Idle;
     void Start()
     {
-        _characterController = GetComponent<CharacterController>();
+       // _characterController = GetComponent<CharacterController>();
+        _navMeshAgent = GetComponent<NavMeshAgent>();
+        _navMeshAgent.speed = MoveSpeed;
+
         _target = GameObject.FindGameObjectWithTag("Player").transform;
         StartPosition = transform.position;
 
@@ -66,7 +73,7 @@ public class Monster : MonoBehaviour, IHitable
         // 1. 몬스터가 가질 수 있는 행동에 따라 상태를 나눈다.
         // 2. 상태들이 조건에 따라 자연스럽게 전환(Transition)되게 설계한다. 
         
-        switch (_currentState)
+        switch (_currentState) // Update() 안에서 계속 호출
         {
             case MonsterState.Idle:
                 Idle();
@@ -113,9 +120,16 @@ public class Monster : MonoBehaviour, IHitable
         dir.y = 0;
         dir.Normalize();
         // 2. 이동한다.
-        _characterController.Move(dir * MoveSpeed * Time.deltaTime);
+        // _characterController.Move(dir * MoveSpeed * Time.deltaTime);
+
+        // 내비게이션이 접근하는 최소 거리를 공격 가능 거리로 설정
+        _navMeshAgent.stoppingDistance = AttackDistance;
+
+        // 내비게이션의 목적지를 플레이어의 위치로 한다.
+        _navMeshAgent.destination = _target.position;
+
         // 3. 쳐다본다.
-        transform.forward = -dir; //(_target);
+        //transform.forward = -dir; //(_target);
 
         if(Vector3.Distance(transform.position, StartPosition) >= MoveDistance)
         {
@@ -140,12 +154,23 @@ public class Monster : MonoBehaviour, IHitable
         dir.y = 0;
         dir.Normalize();
         // 2. 이동한다.
-        _characterController.Move(dir * MoveSpeed * Time.deltaTime);
+        //_characterController.Move(dir * MoveSpeed * Time.deltaTime);
         // 3. 쳐다본다.
-        transform.forward = dir; 
+        //transform.forward = -dir; 
 
+        // 내비게이션이 접근하는 최소 거리를 오차범위로 설정
+        _navMeshAgent.stoppingDistance = TOLERANCE;
+
+        // 내비게이션의 목적지를 시작 위치로 한다.
+        _navMeshAgent.destination = StartPosition;
 
         // 이동 완료
+        if (!_navMeshAgent.pathPending && _navMeshAgent.remainingDistance <= TOLERANCE) //허용 오차
+        {
+            Debug.Log("상태 전환: Comeback -> idle");
+            _currentState = MonsterState.Idle; 
+        }
+        
         if (Vector3.Distance(StartPosition, transform.position) <= TOLERANCE) //허용 오차
         {
             Debug.Log("상태 전환: Comeback -> idle"); 
@@ -161,7 +186,7 @@ public class Monster : MonoBehaviour, IHitable
             _attackTimer = 0f;
             Debug.Log("상태 전환: Attack -> Trace");
             _currentState = MonsterState.Trace;
-            return;
+            return;     // 이 메서드를 즉시 종료
         }
 
         // 실습 과제 35. Attack 상태일 때 N초에 한 번 때리게 딜레이 주기
@@ -173,34 +198,35 @@ public class Monster : MonoBehaviour, IHitable
             {
                 Debug.Log("때렸다!");
                 playerHitable.Hit(Damage);
+                // 공격한 후에는 _attackTimer를 0으로 초기화하여 다시 딜레이 시간을 측정하도록 함
                 _attackTimer = 0f;
             }
         }
 
     }
 
-    private void Damaged()
+    private void Damaged() // 넉백
     {
         // 1. Damage 애니메이션 실행(0.5초)
         // todo: 애니메이션 실행
 
         // 2. 넉백 구현
         // 2-1. 넉백 시작/최종 위치를 구한다.
-        if (_knockbackProgress == 0)
+        if (_knockbackProgress == 0) // 진행률: 0 (시작)
         {
             _knockbackStartPosition = transform.position;
-            Vector3 dir = transform.position - _target.position; 
+            Vector3 dir = transform.position - _target.position; // dir: 방향
             dir.y = 0;
             dir.Normalize();
 
-            _knockbackEndPosition = transform.position + dir * KnockbackPower;
+            _knockbackEndPosition = transform.position + dir * KnockbackPower; // 넉백 됐을 때 위치
         }
         _knockbackProgress += Time.deltaTime / KNOCKBACK_DURATION;
 
 
-        // 2-2. Lerp를 이용해 넉백
+        // 2-2. Lerp(선형보간)를 이용해 넉백
         transform.position = Vector3.Lerp(_knockbackStartPosition, _knockbackEndPosition, _knockbackProgress);
-        if(_knockbackProgress > 1)
+        if(_knockbackProgress > 1)  // 진행률: 1 (완료)
         {
             _knockbackProgress = 0f;
 
