@@ -86,7 +86,7 @@ public class ItemObject : MonoBehaviour
             // 진행도를 누적하는 시간을 계산하고, 현재 위치를 갱신합니다.
             _progress += Time.deltaTime / TRACE_DURATION;
             transform.position = Vector3.Slerp(_startPosition, _player.position, _progress);
-
+            
             // 다음 프레임까지 대기한다.
             yield return null;
         }
