@@ -73,8 +73,9 @@ public class PlayerMoveAbility : MonoBehaviour, IHitable
         Health -= damage;
         if (Health <= 0)
         {
-            Destroy(gameObject);
-            //gameObject.SetActive(false);
+           gameObject.SetActive(false);
+           GameManager.Instance.GameOver();
+
         }
     }
 
