@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Security.Cryptography;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -36,7 +37,7 @@ public class PlayerGunFireAbility : MonoBehaviour
 
     // UI 위에 text로 표시하기 (ex. 30/30)
     public Text GunTextUI;
-    public Text ReloadTextUI;
+    public TextMeshProUGUI ReloadTextUI;
     
     private bool _isReloading = false;
 

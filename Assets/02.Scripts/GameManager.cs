@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 
 // 역할: 게임 관리자
 // -> 게임 전체의 상태를 알리고, 시작과 끝을 텍스트로 나타낸다.
@@ -20,7 +20,7 @@ public class GameManager : MonoBehaviour
     // 게임의 상태는 처음에 "준비" 상태
     public GameState State { get; private set; } = GameState.Ready;
 
-    public Text StateTextUI;
+    public TextMeshProUGUI StateTextUI;
 
     public Color GoStateColor;
 
