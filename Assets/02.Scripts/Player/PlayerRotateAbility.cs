@@ -13,6 +13,11 @@ public class PlayerRotateAbility : MonoBehaviour
 
     void Update()
     {
+        if (GameManager.Instance.State != GameState.Go)
+        {
+            return;
+        }
+
         if (!CameraManager.Focus)
         {
             return;

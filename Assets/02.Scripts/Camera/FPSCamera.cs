@@ -46,6 +46,11 @@ public class FPSCamera : MonoBehaviour
 
     private void LateUpdate()
     {
+        if (GameManager.Instance.State != GameState.Go)
+        {
+            return;
+        }
+
         if (CameraManager.Instance.Mode == CameraMode.FPS)
         {
             // 1. 캐릭터의 눈 위치로 카메라를 이동시킨다.

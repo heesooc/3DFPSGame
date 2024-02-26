@@ -7,6 +7,11 @@ public class PlayerItemUseAbility : MonoBehaviour
    
     void Update()
     {
+        if (GameManager.Instance.State != GameState.Go)
+        {
+            return;
+        }
+
         // 실습 과제 31. T/Y/U 버튼 누르면 아이템 '사용' 구현
         if (Input.GetKeyDown(KeyCode.T))
         {

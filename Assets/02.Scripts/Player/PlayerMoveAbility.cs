@@ -111,6 +111,11 @@ public class PlayerMoveAbility : MonoBehaviour, IHitable
 
     void Update()
     {
+        if(GameManager.Instance.State != GameState.Go)
+        {
+            return;
+        }
+
         HealthSliderUI.value = (float)Health / (float)MaxHealth; // 0 ~ 1
 
         // 1. 만약 벽에 닿아 있는데 && 스태미나 > 0 

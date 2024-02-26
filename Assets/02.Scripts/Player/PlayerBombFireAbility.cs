@@ -39,6 +39,11 @@ public class PlayerBombFireAbility : MonoBehaviour
     }
     private void Update()
     {
+        if (GameManager.Instance.State != GameState.Go)
+        {
+            return;
+        }
+
         /* 수류탄 투척 */
         // 1. 마우스 오른쪽 버튼을 눌렀을 때 && 수류탄 개수가 0보다 크면
         if (Input.GetMouseButtonDown(1) && BombRemainCount > 0)
