@@ -6,6 +6,8 @@ using UnityEngine.UI;
 
 public class PlayerBombFireAbility : MonoBehaviour
 {
+    private Animator _animator;
+
     public GameObject BombPrefab;
     public Transform FirePosition;
     public float ThrowPower = 20f;
@@ -32,7 +34,12 @@ public class PlayerBombFireAbility : MonoBehaviour
 
         BombRemainCount = BombMaxCount;
         RefreshUI();
+
+        _animator = GetComponentInChildren<Animator>();
+
     }
+
+  
     private void RefreshUI() 
     {
         BombTextUI.text = $"{BombRemainCount}/{BombMaxCount}";
@@ -58,6 +65,7 @@ public class PlayerBombFireAbility : MonoBehaviour
             {
                 if (BombPool[i].activeInHierarchy == false) // 2. 쓸만한 폭탄을 찾는다.
                 {
+                    _animator.SetTrigger("Throw");
                     bomb = BombPool[i];
                     bomb.SetActive(true); // 3. 꺼낸다.
                     break;

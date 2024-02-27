@@ -10,7 +10,7 @@ public class PlayerGunFireAbility : MonoBehaviour
 {
     public Gun CurrentGun; // 현재 들고있는 총
     private int _currentGunIndex; // 현재 들고 있는 총의 순서
-
+    
 
     private float _timer;
 
@@ -32,8 +32,7 @@ public class PlayerGunFireAbility : MonoBehaviour
     // 필요 속성
     // - 총알 튀는 이펙트 프리팹
     public ParticleSystem HitEffect;
-
-   
+    private Animator _animator;
 
     // UI 위에 text로 표시하기 (ex. 30/30)
     public Text GunTextUI;
@@ -43,7 +42,11 @@ public class PlayerGunFireAbility : MonoBehaviour
 
     // 무기 이미지 UI
     public Image GunImageUI;
-    
+
+    private void Awake()
+    {
+        _animator = GetComponentInChildren<Animator>();
+    }
 
     private void Start()
     {
@@ -185,6 +188,8 @@ public class PlayerGunFireAbility : MonoBehaviour
         // 1. 만약에 마우스 왼쪽 버튼을 누른 상태 && 쿨타임이 다 지난 상태 && 총알 개수 > 0
         if (Input.GetMouseButton(0) && _timer >= CurrentGun.FireCooltime && CurrentGun.BulletRemainCount > 0)
         {
+            _animator.SetTrigger("Shot");
+
             // 재장전 취소
             if (_isReloading)
             {
