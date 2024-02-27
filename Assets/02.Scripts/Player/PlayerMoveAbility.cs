@@ -72,6 +72,9 @@ public class PlayerMoveAbility : MonoBehaviour, IHitable
         CameraManager.Instance.CameraShake.Shake();
 
         Health -= damage;
+
+        _animator.SetLayerWeight(1, 1 - Health / (float)MaxHealth);
+
         if (Health <= 0)
         {
            gameObject.SetActive(false);
