@@ -29,7 +29,7 @@ public class Monster : MonoBehaviour, IHitable
 
     // private CharacterController _characterController;
     private NavMeshAgent _navMeshAgent;
-
+    private Animator _animator;
 
 
     public Transform _target;           // 플레이어
@@ -59,6 +59,8 @@ public class Monster : MonoBehaviour, IHitable
        // _characterController = GetComponent<CharacterController>();
         _navMeshAgent = GetComponent<NavMeshAgent>();
         _navMeshAgent.speed = MoveSpeed;
+
+        _animator = GetComponentInChildren<Animator>();
 
         _target = GameObject.FindGameObjectWithTag("Player").transform;
         StartPosition = transform.position;
@@ -109,6 +111,10 @@ public class Monster : MonoBehaviour, IHitable
                 Damaged();
                 break;
 
+            case MonsterState.Die: 
+                Die(); 
+                break;
+
         }
     }
 
@@ -120,6 +126,7 @@ public class Monster : MonoBehaviour, IHitable
         if (Vector3.Distance(_target.position, transform.position) <= FindDistance) 
         {
             Debug.Log("상태 전환: Idle -> Trace");
+            _animator.SetTrigger("IdleToTrace");
             _currentState = MonsterState.Trace;
         }
 
@@ -129,6 +136,7 @@ public class Monster : MonoBehaviour, IHitable
         {
             // {특정 지점}으로 순찰을 감
             Debug.Log("상태 전환: Idle -> Patrol");
+            _animator.SetTrigger("IdleToPatrol");
             _currentState = MonsterState.Patrol;
             _idleTimer = 0f;
         }
@@ -145,12 +153,14 @@ public class Monster : MonoBehaviour, IHitable
         if (Vector3.Distance(_target.position, transform.position) <= FindDistance)
         {
             Debug.Log("상태 전환: Patrol -> Trace");
+            _animator.SetTrigger("PatrolToTrace");
             _currentState = MonsterState.Trace;
         }
         // NavMeshAgent의 경로 계산이 끝났고, 남아있는 거리가 허용 오차(TOLERANCE) 이하라면 복귀 상태로 전환
         if (!_navMeshAgent.pathPending && _navMeshAgent.remainingDistance <= TOLERANCE) // pathPending: 경로 보류 중
         {
             Debug.Log("상태 전환: Patrol -> Comeback");
+            _animator.SetTrigger("PatrolToComeback");
             _currentState = MonsterState.Comeback;
         }
 
@@ -180,11 +190,13 @@ public class Monster : MonoBehaviour, IHitable
         if(Vector3.Distance(transform.position, StartPosition) >= MoveDistance)
         {
             Debug.Log("상태 전환: Trace -> Comeback");
+            _animator.SetTrigger("TraceToComeback");
             _currentState = MonsterState.Comeback;
         }
         if (Vector3.Distance(_target.position, transform.position) <= AttackDistance)
         {
             Debug.Log("상태 전환: Trace -> Attack");
+            _animator.SetTrigger("TraceToAttack");
             _currentState = MonsterState.Attack;
         }
 
@@ -213,13 +225,15 @@ public class Monster : MonoBehaviour, IHitable
         // 이동 완료
         if (!_navMeshAgent.pathPending && _navMeshAgent.remainingDistance <= TOLERANCE) //허용 오차
         {
-            Debug.Log("상태 전환: Comeback -> idle");
+            Debug.Log("상태 전환: Comeback -> Idle");
+            _animator.SetTrigger("ComebackToIdle");
             _currentState = MonsterState.Idle; 
         }
         
         if (Vector3.Distance(StartPosition, transform.position) <= TOLERANCE) //허용 오차
         {
-            Debug.Log("상태 전환: Comeback -> idle"); 
+            Debug.Log("상태 전환: Comeback -> Idle");
+            _animator.SetTrigger("ComebackToIdle");
             _currentState = MonsterState.Idle; // 이동 완료
         }
     }
@@ -231,6 +245,7 @@ public class Monster : MonoBehaviour, IHitable
         {
             _attackTimer = 0f;
             Debug.Log("상태 전환: Attack -> Trace");
+            _animator.SetTrigger("AttackToTrace");
             _currentState = MonsterState.Trace;
             return;     // 이 메서드를 즉시 종료
         }
@@ -239,16 +254,24 @@ public class Monster : MonoBehaviour, IHitable
         _attackTimer += Time.deltaTime;
         if (_attackTimer >= AttackDelay)
         {
-            IHitable playerHitable = _target.GetComponent<IHitable>();
-            if (playerHitable != null)
-            {
-                Debug.Log("때렸다!");
-                playerHitable.Hit(Damage);
-                // 공격한 후에는 _attackTimer를 0으로 초기화하여 다시 딜레이 시간을 측정하도록 함
-                _attackTimer = 0f;
-            }
+            _animator.SetTrigger("Attack");
+            //_animator.Play("Attack");
+           
         }
 
+    }
+
+    public void PlayerAttack()
+    {
+        IHitable playerHitable = _target.GetComponent<IHitable>();
+        if (playerHitable != null)
+        {
+            Debug.Log("때렸다!");
+
+            playerHitable.Hit(Damage);
+            // 공격한 후에는 _attackTimer를 0으로 초기화하여 다시 딜레이 시간을 측정하도록 함
+            _attackTimer = 0f;
+        }
     }
 
     private void Damaged() // 넉백
@@ -277,26 +300,56 @@ public class Monster : MonoBehaviour, IHitable
             _knockbackProgress = 0f;
 
             Debug.Log("상태 전환: Damaged -> Trace");
+            _animator.SetTrigger("DamagedToTrace");
             _currentState = MonsterState.Trace;
         }
     }
 
     public void Hit(int damage)
     {
+        if(_currentState == MonsterState.Die)
+        {
+            return;
+        }
+
         Health -= damage;
         if (Health <= 0)
         {
-            Die();
+            Debug.Log("상태 전환: Any -> Die");
+            
+            _animator.SetTrigger($"Die{Random.Range(1,3)}");
+            _currentState = MonsterState.Die;
         }
         else
         {
             Debug.Log("상태 전환: Any -> Damaged");
+            _animator.SetTrigger("Damaged");
             _currentState = MonsterState.Damaged;
         }
     }
 
+    private Coroutine _dieCoroutine;
+
     private void Die()
     {
+        // 매 프레임마다 해야 할 행동을 추가
+
+        if (_dieCoroutine == null)
+        {
+            _dieCoroutine = StartCoroutine(Die_Coroutine());
+        }
+        
+    }
+
+    private IEnumerator Die_Coroutine()
+    {
+        _navMeshAgent.isStopped = true;
+        _navMeshAgent.ResetPath(); //현재 경로를 지움
+
+        HealthSliderUI.gameObject.SetActive(false);
+
+        yield return new WaitForSeconds(2f);
+
         // 죽을 때 아이템 생성
         ItemObjectFactory.Instance.MakePercent(transform.position);
 
