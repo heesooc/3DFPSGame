@@ -8,16 +8,18 @@ using UnityEngine.UI;
 
 public class PlayerGunFireAbility : MonoBehaviour
 {
+    private Animator _animator;
+
     public Gun CurrentGun; // 현재 들고있는 총
     private int _currentGunIndex; // 현재 들고 있는 총의 순서
-    
+
 
     private float _timer;
 
     private const int DefaultFOV = 60;
     private const int ZoomFOV = 20;
     private bool _isZoomMode = false; // 줌 모드냐?
-    
+
     private const float ZoomInDuration = 0.3f;
     private const float ZoomOutDuration = 0.2f;
     private float _zoomProgress; // 줌 진행률: 0 ~ 1
@@ -32,12 +34,11 @@ public class PlayerGunFireAbility : MonoBehaviour
     // 필요 속성
     // - 총알 튀는 이펙트 프리팹
     public ParticleSystem HitEffect;
-    private Animator _animator;
 
     // UI 위에 text로 표시하기 (ex. 30/30)
     public Text GunTextUI;
     public TextMeshProUGUI ReloadTextUI;
-    
+
     private bool _isReloading = false;
 
     // 무기 이미지 UI
@@ -48,8 +49,15 @@ public class PlayerGunFireAbility : MonoBehaviour
         _animator = GetComponentInChildren<Animator>();
     }
 
+    public List<GameObject> MuzzleEffects;
+
     private void Start()
     {
+        foreach (GameObject muzzleEffect in MuzzleEffects)
+        {
+            muzzleEffect.SetActive(false);
+        }
+
         _currentGunIndex = 0;
 
         RefreshUI();
@@ -71,7 +79,7 @@ public class PlayerGunFireAbility : MonoBehaviour
         if (!_isZoomMode)
         {
             Camera.main.fieldOfView = DefaultFOV;
-            
+
         }
         else
         {
@@ -96,21 +104,21 @@ public class PlayerGunFireAbility : MonoBehaviour
         }
 
         if (CurrentGun.GType == GunType.Sniper && _zoomProgress < 1)
+        {
+            if (_isZoomMode)
             {
-                if (_isZoomMode)
-                {
-                    _zoomProgress += Time.deltaTime / ZoomInDuration;
-                    Camera.main.fieldOfView = Mathf.Lerp(DefaultFOV, ZoomFOV, _zoomProgress);
-                }
-                else
-                {
-                    _zoomProgress += Time.deltaTime / ZoomOutDuration;
-                    Camera.main.fieldOfView = Mathf.Lerp(ZoomFOV, DefaultFOV, _zoomProgress);
-                }
+                _zoomProgress += Time.deltaTime / ZoomInDuration;
+                Camera.main.fieldOfView = Mathf.Lerp(DefaultFOV, ZoomFOV, _zoomProgress);
             }
+            else
+            {
+                _zoomProgress += Time.deltaTime / ZoomOutDuration;
+                Camera.main.fieldOfView = Mathf.Lerp(ZoomFOV, DefaultFOV, _zoomProgress);
+            }
+        }
 
 
-        
+
 
 
         if (Input.GetKeyDown(KeyCode.LeftBracket)) // '['
@@ -126,7 +134,7 @@ public class PlayerGunFireAbility : MonoBehaviour
             RefreshZoomMode();
             RefreshGun();
             RefreshUI();
-        } 
+        }
         else if (Input.GetKeyDown(KeyCode.RightBracket)) // ']'
         {
             _currentGunIndex++;
@@ -164,7 +172,7 @@ public class PlayerGunFireAbility : MonoBehaviour
         }
         else if (Input.GetKeyDown(KeyCode.Alpha3))
         {
-            _currentGunIndex = 2;  
+            _currentGunIndex = 2;
             CurrentGun = GunInventory[2];
             _isZoomMode = false;
             _zoomProgress = 1f;
@@ -181,29 +189,32 @@ public class PlayerGunFireAbility : MonoBehaviour
 
                 StartCoroutine(Reload_Coroutine());
             }
-          
+
         }
         _timer += Time.deltaTime;
 
         // 1. 만약에 마우스 왼쪽 버튼을 누른 상태 && 쿨타임이 다 지난 상태 && 총알 개수 > 0
         if (Input.GetMouseButton(0) && _timer >= CurrentGun.FireCooltime && CurrentGun.BulletRemainCount > 0)
         {
-            _animator.SetTrigger("Shot");
+
 
             // 재장전 취소
             if (_isReloading)
             {
                 ReloadTextUI.text = "";
                 StopAllCoroutines();
-                
+
                 _isReloading = false;
             }
+            _animator.SetTrigger("Shot");
+
             CurrentGun.BulletRemainCount--;
             RefreshUI();
 
             _timer = 0;
 
-            
+            StartCoroutine(MuzzleEffectOn_Coroutine());
+
 
             // 2. 레이(광선)을 생성하고, 위치와 방향을 설정한다.
             Ray ray = new Ray(Camera.main.transform.position, Camera.main.transform.forward);
@@ -214,13 +225,13 @@ public class PlayerGunFireAbility : MonoBehaviour
             if (isHit)
             {
                 // 실습 과제 18. 레이저를 몬스터에게 맞출 시 몬스터 체력 닳는 기능 구현
-                
+
                 IHitable hitableObject = hitInfo.collider.GetComponent<IHitable>();
                 if (hitableObject != null)
                 {
                     hitableObject.Hit(CurrentGun.Damage);
                 }
-                
+
                 // 5. 부딪힌 위치에 (총알이 튀는)이펙트를 위치한다.
                 HitEffect.gameObject.transform.position = hitInfo.point;
                 // 6. 이펙트가 쳐다보는 방향을 부딪힌 위치의 '법선 벡터'로 한다.
@@ -228,10 +239,24 @@ public class PlayerGunFireAbility : MonoBehaviour
                 HitEffect.Play();
             }
 
-            
+
         }
 
     }
+
+    private IEnumerator MuzzleEffectOn_Coroutine()
+    {
+        // 총 이펙트 중 하나를 켜준다.
+        int randomIndex = UnityEngine.Random.Range(0, MuzzleEffects.Count);
+        MuzzleEffects[randomIndex].SetActive(true);
+
+        // 0.1초 후...
+        yield return new WaitForSeconds(0.1f);
+
+        // 꺼준다. 
+        MuzzleEffects[randomIndex].SetActive(false);
+    }
+
     private IEnumerator Reload_Coroutine()
     {
         _isReloading = true;
