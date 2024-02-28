@@ -16,9 +16,17 @@ public class Drum : MonoBehaviour, IHitable
 
     private bool _isExplosion = false;
 
+    public Texture[] textures;
+    private new MeshRenderer renderer;
+    
     private void Start()
     {
         _rigidbody = GetComponent<Rigidbody>();
+
+        renderer = GetComponentInChildren<MeshRenderer>();
+
+        int idx = Random.Range(0, textures.Length);
+        renderer.material.mainTexture = textures[idx];
     }
 
 

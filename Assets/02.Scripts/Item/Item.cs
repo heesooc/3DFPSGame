@@ -35,6 +35,7 @@ public class Item
         {
             case ItemType.Health:
             {
+                    Debug.Log("체력");
                     // Todo: 플레이어 체력 꽉차기
                     PlayerMoveAbility playerMoveAbility = GameObject.FindWithTag("Player").GetComponent<PlayerMoveAbility>();
                     playerMoveAbility.Health = playerMoveAbility.MaxHealth;
@@ -43,6 +44,8 @@ public class Item
 
             case ItemType.Stamina:
             {
+                    Debug.Log("체력");
+
                     // Todo: 플레이어 스태미나 꽉차기
                     PlayerMoveAbility playerMoveAbility = GameObject.FindWithTag("Player").GetComponent<PlayerMoveAbility>();
                     playerMoveAbility.Stamina = PlayerMoveAbility.MaxStamina;
@@ -51,6 +54,8 @@ public class Item
             }
             case ItemType.Bullet:
             {
+                    Debug.Log("체력");
+
                     // Todo: 플레이어 현재 들고있는 총의 총알이 꽉찬다.
                     PlayerGunFireAbility playerGunAbility = GameObject.FindWithTag("Player").GetComponent<PlayerGunFireAbility>();
                     playerGunAbility.CurrentGun.BulletRemainCount = playerGunAbility.CurrentGun.BulletMaxCount;
