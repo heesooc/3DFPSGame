@@ -30,7 +30,7 @@ public class Drum : MonoBehaviour, IHitable
     }
 
 
-    public void Hit(int damage)
+    public void Hit(DamageInfo damageInfo)
     {
         _hitCount += 1;
         if (_hitCount >= 3)
@@ -66,7 +66,8 @@ public class Drum : MonoBehaviour, IHitable
             if (c.TryGetComponent<IHitable>(out hitable))
             {
                 // 3. 데미지 주기
-                hitable.Hit(Damage);
+                DamageInfo damageInfo = new DamageInfo(DamageType.Normal, Damage);
+                hitable.Hit(damageInfo);
             }
         }
         int environmentLayer = LayerMask.GetMask("Environment");

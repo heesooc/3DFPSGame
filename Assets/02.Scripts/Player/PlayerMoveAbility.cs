@@ -66,12 +66,12 @@ public class PlayerMoveAbility : MonoBehaviour, IHitable
     // 2. 플레이어에게 y축에 있어 중력을 적용한다.
 
 
-    public void Hit(int damage)
+    public void Hit(DamageInfo damageInfo)
     {
         StartCoroutine(HitEffect_Coroutine(0.2f));
         CameraManager.Instance.CameraShake.Shake();
 
-        Health -= damage;
+        Health -= damageInfo.Amount;
 
         _animator.SetLayerWeight(1, 1 - Health / (float)MaxHealth);
 
@@ -210,7 +210,8 @@ public class PlayerMoveAbility : MonoBehaviour, IHitable
                    ex) -50 < y축 속도 < -40 일 때, Damage는 10 * (40~50 / 10) = 40~50*/
                 // switch case문 시험성적 100->10, 99~90->9... 로 매기듯이 하기위하여 곱하기/나누기함
                 // 이렇게 하면 높은 곳에서 떨어져서 더 빠른 속도로 추락하면 더 많은 데미지를 입게 됨
-                Hit(10 * (int)(_yVelocity / -10f));
+                DamageInfo damageInfo = new DamageInfo(DamageType.Normal, 10 * (int)(_yVelocity / -10f));
+                Hit(damageInfo);
             }
 
             _isJumping = false;

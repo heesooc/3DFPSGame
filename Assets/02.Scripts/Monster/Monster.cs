@@ -35,7 +35,7 @@ public class Monster : MonoBehaviour, IHitable
     public Transform _target;           // 플레이어
     public float FindDistance = 5f;     // 감지 범위
     public float AttackDistance = 2f;   // 공격 범위
-    public float MoveSpeed = 4;         // 이동 상태
+    public float MoveSpeed = 4f;         // 이동 상태
     public Vector3 StartPosition;       // 시작 위치
     public float MoveDistance = 10f;    // 움직일 수 있는 거리
     public const float TOLERANCE = 0.1f; // 허용오차
@@ -54,6 +54,8 @@ public class Monster : MonoBehaviour, IHitable
     private const float IDLE_DURATION = 3f;
 
     private MonsterState _currentState = MonsterState.Idle;
+
+
     void Start()
     {
        // _characterController = GetComponent<CharacterController>();
@@ -268,7 +270,8 @@ public class Monster : MonoBehaviour, IHitable
         {
             Debug.Log("때렸다!");
 
-            playerHitable.Hit(Damage);
+            DamageInfo damageInfo = new DamageInfo(DamageType.Normal, Damage);
+            playerHitable.Hit(damageInfo);
             // 공격한 후에는 _attackTimer를 0으로 초기화하여 다시 딜레이 시간을 측정하도록 함
             _attackTimer = 0f;
         }
@@ -305,14 +308,24 @@ public class Monster : MonoBehaviour, IHitable
         }
     }
 
-    public void Hit(int damage)
+    public void Hit(DamageInfo damage)
     {
         if(_currentState == MonsterState.Die)
         {
             return;
         }
 
-        Health -= damage;
+        // Todo.데미지 타입이 크리티컬이면  피흘리기
+        if (damage.DamageType == DamageType.Critical)
+        {
+            
+            BloodFactory.Instance.Make(damage.Position, damage.Normal);
+        }
+
+
+        Health -= damage.Amount;
+
+
         if (Health <= 0)
         {
             Debug.Log("상태 전환: Any -> Die");

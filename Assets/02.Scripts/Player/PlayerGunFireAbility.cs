@@ -226,10 +226,21 @@ public class PlayerGunFireAbility : MonoBehaviour
             {
                 // 실습 과제 18. 레이저를 몬스터에게 맞출 시 몬스터 체력 닳는 기능 구현
 
-                IHitable hitableObject = hitInfo.collider.GetComponent<IHitable>();
-                if (hitableObject != null)
+                IHitable hitObject = hitInfo.collider.GetComponent<IHitable>();
+                if (hitObject != null)
                 {
-                    hitableObject.Hit(CurrentGun.Damage);
+                    DamageInfo damageInfo = new DamageInfo(DamageType.Normal, CurrentGun.Damage);
+                    damageInfo.Position = hitInfo.point;
+                    damageInfo.Normal = hitInfo.normal;
+
+                    if (UnityEngine.Random.Range(0, 2) == 0)
+                    {
+                        Debug.Log("크리티컬!");
+                        damageInfo.DamageType = DamageType.Critical;
+                        damageInfo.Amount *= 2;
+                    }
+
+                    hitObject.Hit(damageInfo);
                 }
 
                 // 5. 부딪힌 위치에 (총알이 튀는)이펙트를 위치한다.

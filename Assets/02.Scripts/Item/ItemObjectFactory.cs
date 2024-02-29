@@ -28,6 +28,7 @@ public class ItemObjectFactory : MonoBehaviour
 
     public void Awake()
     {
+
         // 싱글톤 인스턴스를 설정
         Instance = this;
 

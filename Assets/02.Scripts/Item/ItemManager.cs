@@ -36,10 +36,12 @@ public class ItemManager : MonoBehaviour
 
     private void Start()
     {
+        
         ItemList.Add(new Item(ItemType.Health, 3)); // 0. Health
         ItemList.Add(new Item(ItemType.Stamina, 5)); // 1. Stamina
         ItemList.Add(new Item(ItemType.Bullet, 7)); // 2. Bullet
 
+        UI_ItemInventory.Instance.Refresh();
     }
 
     // 1. 아이템 추가(생성)
@@ -50,7 +52,8 @@ public class ItemManager : MonoBehaviour
             if (ItemList[i].ItemType == itemType)
             {
                 ItemList[i].Count++;
-                if(OnDataChanged != null)
+                UI_ItemInventory.Instance.Refresh();
+                if (OnDataChanged != null)
                 {
                     OnDataChanged.Invoke();
                 }
@@ -62,7 +65,7 @@ public class ItemManager : MonoBehaviour
     // 2. 아이템 개수 조회
     public int GetItemCount(ItemType itemType)
     {
-        for (int i = 0; i < ItemList.Count; i++)
+        for (int i = 0; i < ItemList.Count; i++)       
         {
             if (ItemList[i].ItemType == itemType)
             {
@@ -81,6 +84,7 @@ public class ItemManager : MonoBehaviour
             if (ItemList[i].ItemType == itemType)
             {
                 bool result = ItemList[i].TryUse();
+                UI_ItemInventory.Instance.Refresh();
 
                 if (OnDataChanged != null)
                 {
