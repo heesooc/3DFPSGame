@@ -15,7 +15,7 @@ public class ItemManager : MonoBehaviour
     // 유튜버는 구독자에게 이벤트를 통지하고, 구독자들은 이벤트 알림을 받아 적절하게
     // 행동하는 패턴
 
-    public static ItemManager Instance { get; private set; }
+    public static ItemManager Instance;
 
     
 

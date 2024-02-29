@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
-using Cursor = UnityEngine.Cursor;
+//using UnityEngine.Cursor;
 
 // 1인칭 슈팅 (First Person Shooter)
 // 게임상의 캐릭터의 시점을 보는 카메라
