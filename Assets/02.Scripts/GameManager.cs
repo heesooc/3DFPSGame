@@ -26,6 +26,7 @@ public class GameManager : MonoBehaviour
     public Color GoStateColor;
 
     public UI_OptionPopup OptionUI;
+    public UI_OptionPopup GameoverUI;
 
     private void Awake()
     {
@@ -67,6 +68,7 @@ public class GameManager : MonoBehaviour
             State = GameState.Over;
             StateTextUI.gameObject.SetActive(true);
             Refresh();
+            GameoverUI.Open();
     }
     public void Pause()
     {
@@ -82,6 +84,11 @@ public class GameManager : MonoBehaviour
 
     public void OnOptionButtonClicked()
     {
+        if(State == GameState.Over)
+        {
+            return;
+        }
+
         Debug.Log("옵션 버튼 클릭");
 
         Pause();
